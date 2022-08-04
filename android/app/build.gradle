@@ -166,6 +166,9 @@ android {
                 }
             }
         }
+
+        testBuildType System.getProperty('testBuildType', 'debug')
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
 
     if (isNewArchitectureEnabled()) {
@@ -284,6 +287,9 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    implementation 'androidx.appcompat:appcompat:1.4.2'
+    androidTestImplementation('com.wix:detox:+')
 }
 
 if (isNewArchitectureEnabled()) {
