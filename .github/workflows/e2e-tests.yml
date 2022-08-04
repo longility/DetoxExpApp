@@ -1,0 +1,44 @@
+name: 'e2e tests'
+
+on:
+  push:
+    branches: [main]
+jobs:
+  android-e2e-tests:
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          cache: "yarn"
+      - name: Cache node_modules
+        uses: actions/cache@v2
+        with:
+          path: |
+            ./node_modules/
+          key: ${{ runner.os }}-${{ hashFiles('./yarn.lock') }} }}
+      
+      - run: yarn install --frozen-lockfile
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+      - run: yarn detox -c android build
+
+      # detox build does not fail so this is to fail fast
+      - name: Check successful build
+        run: ls -la ${{ github.workspace }}/android/app/build/outputs/apk/debug
+
+      - name: Run e2e tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 31
+          target: default
+          arch: x86_64
+          profile: pixel_4
+          avd-name: Pixel_4_API_31_AOSP
+          disk-size: 5G
+          ram-size: 2048M
+          heap-size: 512M
+          script: yarn start & yarn detox -c android test --cleanup --headless
